@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:orientation="vertical"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="parent"
+       app:layout_constraintVertical_bias="1.0">
+
+        <androidx.camera.view.PreviewView
+             android:id="@+id/previewView"
+             android:layout_width="match_parent"
+             android:layout_height="500dp"
+             android:layout_weight="90" />
+
+       <!--<ImageView
+           android:id="@+id/imageView"
+           android:layout_width="match_parent"
+           android:layout_height="500dp"
+           android:layout_weight="90"
+           android:contentDescription="@string/default_text"
+           android:src="@drawable/aspirapolvere" />-->
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="146dp"
+          android:layout_weight="90"
+          android:orientation="horizontal">
+
+          <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+              android:id="@+id/bin_bt"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_margin="5dp"
+              android:layout_weight="1"
+              android:contentDescription="desc"
+              android:gravity="center"
+              android:text="@string/bin_button_text"
+              android:typeface="serif"
+              app:icon="@drawable/ic_bin" />
+
+          <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+              android:id="@+id/trash_bt"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_margin="5dp"
+              android:layout_weight="1"
+              android:contentDescription="desc"
+              android:gravity="center"
+              android:text="@string/trash_button_text"
+              android:typeface="serif"
+              app:icon="@drawable/ic_trash" />
+
+
+          <!--<Button
+              android:id="@+id/picture_bt"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Riconosci rifiuto" />-->
+
+
+           <!--<Button
+               android:id="@+id/mic_buttom"
+               android:layout_width="50dp"
+               android:layout_height="50dp"
+               android:gravity="center_vertical|center_horizontal"
+               android:text="hello"
+               android:layout_weight="1"
+               android:background="@drawable/rounded_button"
+               app:backgroundTint="#EF0C0C"
+               app:icon="@drawable/ic_microphone" />-->
+
+
+           <!--<Button
+               android:id="@+id/analysis_bt"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_weight="1"
+               android:text="Riconosci bidone" />-->
+
+
+       </LinearLayout>
+
+       <TextView
+           android:id="@+id/textView"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_gravity="center_horizontal"
+           android:layout_weight="1"
+           android:text="Clicca su un bottone per riconoscere" />
+
+       <com.google.android.material.floatingactionbutton.FloatingActionButton
+           android:id="@+id/mic_button"
+           android:layout_width="472dp"
+           android:layout_height="wrap_content"
+           android:layout_gravity="center_horizontal"
+           android:layout_margin="16dp"
+           android:contentDescription="ciao"
+           app:srcCompat="@drawable/ic_microphone" />
+
+   </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

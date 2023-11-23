@@ -36,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.concurrent.Executor;
 
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, ImageAnalysis.Analyzer {
 
     private ListenableFuture<ProcessCameraProvider> provider;
@@ -52,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int our_width = 512;
     private int our_height = 384;
     private String [] labels = {"Cartone", "Vetro", "Metallo", "Carta", "Plastica", "Indifferenziato"};
+
+    private ColorUtils colorUtils = new ColorUtils();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,6 +199,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         image.close();
 
+                        String closestColour = colorUtils.getColorNameFromRgb(averageRed,averageGreen,averageBlue);
+                        tv.setText(closestColour);
                     }
                 }
         );

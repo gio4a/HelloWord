@@ -7,7 +7,6 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
-import androidx.camera.core.resolutionselector.ResolutionSelector;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
@@ -17,21 +16,13 @@ import androidx.lifecycle.LifecycleOwner;
 
 import android.Manifest;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
-import android.util.Size;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,20 +32,18 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, ImageAnalysis.Analyzer {
 
     private ListenableFuture<ProcessCameraProvider> provider;
     private static final int PERMISSION_REQUEST_CODE = 200;
-    private Button picture_bt, analysis_bt;
+
+    private static final int DIM_WIN = 40;
+
+    private Button bin_button, trash_button;
     private PreviewView pview;
     private TextView tv;
     private ImageCapture imageCapt;
@@ -72,13 +61,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (! checkPermission())
             requestPermission();
 
-        picture_bt = findViewById(R.id.bin_bt);
-        analysis_bt = findViewById(R.id.trash_bt);
+        bin_button = findViewById(R.id.bin_bt);
+        trash_button = findViewById(R.id.trash_bt);
         tv = findViewById(R.id.textView);
         pview = findViewById(R.id.previewView);
 
-        picture_bt.setOnClickListener(this);
-        analysis_bt.setOnClickListener(this);
+        bin_button.setOnClickListener(this);
+        trash_button.setOnClickListener(this);
         this.analysis_on = false;
 
 
@@ -155,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId())
         {
             case R.id.bin_bt:
-                //capturePhoto();
+                capturePhotoBin();
                 tv.setText("Bidone della carta");
                 break;
 
@@ -164,6 +153,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 capturePhotoTrash();
                 break;
         }
+    }
+
+    private void capturePhotoBin() {
+        tv.setText("in capturePhotoBin");
+        imageCapt.takePicture(
+                getExecutor(),
+                new ImageCapture.OnImageCapturedCallback() {
+                    @Override
+                    public void onCaptureSuccess(ImageProxy image) {
+                        //Create the picture's metadata
+                        tv.setText("in onCaptureSuccess");
+
+                        Bitmap bitmap = image.toBitmap();
+                        tv.setText(bitmap.getHeight()+"x"+bitmap.getWidth());
+
+                        int centreX = bitmap.getWidth()/2;
+                        int centreY = bitmap.getHeight()/2;
+
+                        int sumRed = 0, sumGreen = 0, sumBlue = 0;
+
+                        for (int y = centreY-(DIM_WIN/2); y < centreY+(DIM_WIN/2); y++) {
+                            for (int x = centreX-(DIM_WIN/2); x < centreX+(DIM_WIN/2); x++) {
+                                int px = bitmap.getPixel(y, x);
+
+                                // Get channel values from the pixel value.
+                                int r = Color.red(px);
+                                int g = Color.green(px);
+                                int b = Color.blue(px);
+
+                                sumRed = sumRed + r;
+                                sumGreen = sumGreen + g;
+                                sumBlue = sumBlue + b;
+                            }
+                        }
+
+                        int averageRed = sumRed/(DIM_WIN*DIM_WIN);
+                        int averageGreen = sumGreen/(DIM_WIN*DIM_WIN);
+                        int averageBlue = sumBlue/(DIM_WIN*DIM_WIN);
+
+                        tv.setText("blue " + averageBlue + " green " + averageGreen + " red "+ averageRed);
+
+                        image.close();
+
+                    }
+                }
+        );
+
     }
 
     @Override

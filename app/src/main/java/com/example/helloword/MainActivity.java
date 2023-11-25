@@ -15,12 +15,18 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -34,44 +40,53 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, ImageAnalysis.Analyzer {
 
     private ListenableFuture<ProcessCameraProvider> provider;
-    private static final int PERMISSION_REQUEST_CODE = 200;
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
+    private static final int AUDIO_PERMISSION_REQUEST_CODE = 300;
 
     private static final int DIM_WIN = 40;
+    private ImageAnalysis imageAn;
 
-    private Button bin_button, trash_button;
+    private Button bin_button, trash_button, mic_button;
     private PreviewView pview;
     private TextView tv;
     private ImageCapture imageCapt;
-    private ImageAnalysis imageAn;
-    private boolean analysis_on;
     private int our_width = 512;
     private int our_height = 384;
     private String [] labels = {"Cartone", "Vetro", "Metallo", "Carta", "Plastica", "Indifferenziato"};
 
     private ColorUtils colorUtils = new ColorUtils();
 
+    private SpeechRecognizer speechRecognizer;
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (! checkPermission())
-            requestPermission();
+        if (! checkCameraPermission())
+            requestCameraPermission();
+
+        if (! checkAudioPermission())
+            requestAudioPermission();
+
 
         bin_button = findViewById(R.id.bin_bt);
         trash_button = findViewById(R.id.trash_bt);
+        mic_button = findViewById(R.id.mic_button);
         tv = findViewById(R.id.textView);
         pview = findViewById(R.id.previewView);
 
         bin_button.setOnClickListener(this);
         trash_button.setOnClickListener(this);
-        this.analysis_on = false;
 
 
         provider = ProcessCameraProvider.getInstance(this);
@@ -85,29 +100,114 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 e.printStackTrace();
             }
         }, getExecutor());
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        final Intent speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle bundle) {
+
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+                tv.setText("");
+                tv.setText("Listening...");
+            }
+
+            @Override
+            public void onRmsChanged(float v) {
+
+            }
+
+            @Override
+            public void onBufferReceived(byte[] bytes) {
+
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+
+            }
+
+            @Override
+            public void onError(int i) {
+
+            }
+
+            @Override
+            public void onResults(Bundle bundle) {
+                //micButton.setImageResource(R.drawable.ic_mic_black_off);
+                ArrayList<String> data = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                tv.setText(data.get(0));
+            }
+
+            @Override
+            public void onPartialResults(Bundle bundle) {
+
+            }
+
+            @Override
+            public void onEvent(int i, Bundle bundle) {
+
+            }
+        });
+
+        mic_button.setOnTouchListener((view, motionEvent) -> {
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP){
+                speechRecognizer.stopListening();
+            }
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+                //mic_button.setImageResource(R.drawable.ic_mic_black_24dp);
+                speechRecognizer.startListening(speechRecognizerIntent);
+            }
+            return false;
+        });
+
     }
 
-    private boolean checkPermission() {
+
+    private boolean checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
             return false;
         }
+
         return true;
     }
 
-    private void requestPermission() {
+    private boolean checkAudioPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            return false;
+        }
+
+        return true;
+    }
+
+    private void requestCameraPermission() {
 
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.CAMERA},
-                PERMISSION_REQUEST_CODE);
+                CAMERA_PERMISSION_REQUEST_CODE);
     }
 
+    private void requestAudioPermission() {
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},
+                    AUDIO_PERMISSION_REQUEST_CODE);
+        //}
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case PERMISSION_REQUEST_CODE:
+            case CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
 
@@ -122,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                                requestPermission();
+                                                requestCameraPermission();
                                             }
                                         }
                                     });
@@ -130,6 +230,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 break;
+
+            case AUDIO_PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
+
+                    // main logic
+                } else {
+                    Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                                != PackageManager.PERMISSION_GRANTED) {
+                            showMessageOKCancel("You need to allow access permissions",
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                                requestAudioPermission();
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+                }
+                break;
+
+
         }
     }
 
@@ -204,11 +330,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
         );
-
-    }
-
-    @Override
-    public void analyze(@NonNull ImageProxy image) {
 
     }
 
@@ -293,5 +414,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
         );
+    }
+
+    @Override
+    public void analyze(@NonNull ImageProxy image) {
+
     }
 }

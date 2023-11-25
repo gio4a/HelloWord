@@ -99,9 +99,9 @@
            android:layout_weight="1"
            android:text="Clicca su un bottone per riconoscere" />
 
-       <com.google.android.material.floatingactionbutton.FloatingActionButton
+       <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
            android:id="@+id/mic_button"
-           android:layout_width="472dp"
+           android:layout_width="wrap_content"
            android:layout_height="wrap_content"
            android:layout_gravity="center_horizontal"
            android:layout_margin="16dp"

@@ -28,6 +28,7 @@ android {
     buildFeatures {
         mlModelBinding true
     }
+    namespace 'com.example.helloword'
 }
 
 dependencies {

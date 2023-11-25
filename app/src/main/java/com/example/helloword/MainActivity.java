@@ -143,6 +143,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //micButton.setImageResource(R.drawable.ic_mic_black_off);
                 ArrayList<String> data = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 tv.setText(data.get(0));
+
+                if(data.get(0).equalsIgnoreCase("bidone") || data.get(0).equalsIgnoreCase("cubo")) {
+                    capturePhotoBin();
+                }
+                else if(data.get(0).equalsIgnoreCase("rifiuto") || data.get(0).equalsIgnoreCase("basura")) {
+                    capturePhotoTrash();
+                }
+                else {
+                    //tv.setText("Ripeti, non ho capito");
+                }
             }
 
             @Override
@@ -158,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mic_button.setOnTouchListener((view, motionEvent) -> {
             if (motionEvent.getAction() == MotionEvent.ACTION_UP){
-                speechRecognizer.stopListening();
+                //speechRecognizer.stopListening();
             }
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN){
                 //mic_button.setImageResource(R.drawable.ic_mic_black_24dp);

@@ -21,6 +21,10 @@ import android.graphics.Color;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
@@ -38,6 +42,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -50,14 +55,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ListenableFuture<ProcessCameraProvider> provider;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
     private static final int AUDIO_PERMISSION_REQUEST_CODE = 300;
-
     private static final int DIM_WIN = 40;
     private ImageAnalysis imageAn;
-
     private Button bin_button, trash_button, mic_button;
     private PreviewView pview;
     private TextView tv;
     private ImageCapture imageCapt;
+    private SoundPool soundPool;
+    Model1116 model;
+    private int[] sound=new int[6];
     private int our_width = 512;
     private int our_height = 384;
     private String [] labels = {"Cartone", "Vetro", "Metallo", "Carta", "Plastica", "Indifferenziato"};
@@ -78,12 +84,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (! checkAudioPermission())
             requestAudioPermission();
 
+        try {
+            model = Model1116.newInstance(getApplicationContext());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         bin_button = findViewById(R.id.bin_bt);
         trash_button = findViewById(R.id.trash_bt);
         mic_button = findViewById(R.id.mic_button);
         tv = findViewById(R.id.textView);
         pview = findViewById(R.id.previewView);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .build();
+
+            soundPool = new SoundPool.Builder()
+                    .setAudioAttributes(audioAttributes)
+                    .build();
+
+        } else
+            soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+
+        sound[3] = soundPool.load(this, R.raw.carta, 1);
+        sound[0] = soundPool.load(this, R.raw.cartone, 1);
+        sound[4] = soundPool.load(this, R.raw.plastica, 1);
+        sound[1] = soundPool.load(this, R.raw.vetro, 1);
+        sound[2] = soundPool.load(this, R.raw.metallo, 1);
+        sound[5] = soundPool.load(this, R.raw.indifferenziata, 1);
 
         bin_button.setOnClickListener(this);
         trash_button.setOnClickListener(this);
@@ -142,7 +174,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onResults(Bundle bundle) {
                 //micButton.setImageResource(R.drawable.ic_mic_black_off);
                 ArrayList<String> data = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                tv.setText(data.get(0));
+                //tv.setText(data.get(0));
+                if(data.get(0).equalsIgnoreCase("Bidone"))
+                {
+                    capturePhotoBin();
+                }
+                else if (data.get(0).equalsIgnoreCase("Rifiuto"))
+                {
+                    capturePhotoTrash();
+                }
+                else
+                {
+                    tv.setText("Non ho capito");
+                }
+
+
             }
 
             @Override
@@ -158,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mic_button.setOnTouchListener((view, motionEvent) -> {
             if (motionEvent.getAction() == MotionEvent.ACTION_UP){
-                speechRecognizer.stopListening();
+                //speechRecognizer.stopListening();
             }
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN){
                 //mic_button.setImageResource(R.drawable.ic_mic_black_24dp);
@@ -362,7 +408,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         tv.setText("in onCaptureSuccess");
 
                         try {
-                            Model1116 model = Model1116.newInstance(getApplicationContext());
 
                             Bitmap bitmap = Bitmap.createScaledBitmap(image.toBitmap(), 512, 384, true);
                             tv.setText(bitmap.getHeight()+"x"+bitmap.getWidth());
@@ -402,8 +447,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                             }
                             tv.setText(labels[indexMax]);
-
-
+                            soundPool.play(sound[indexMax], 1, 1,0,0,1);
 
                             // Releases model resources if no longer used.
                             model.close();

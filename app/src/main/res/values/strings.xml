@@ -2,5 +2,6 @@
     <string name="app_name">HelloWord</string>
     <string name="bin_button_text">Bidone</string>
     <string name="trash_button_text">Rifiuto</string>
+    <string name="mic_button_text">Clicca per parlare</string>
     <string name="default_text">default</string>
 </resources>

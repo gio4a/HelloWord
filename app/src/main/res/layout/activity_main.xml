@@ -30,38 +30,42 @@
            android:contentDescription="@string/default_text"
            android:src="@drawable/aspirapolvere" />-->
 
-      <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="146dp"
-          android:layout_weight="90"
-          android:orientation="horizontal">
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_weight="10"
+           android:orientation="horizontal">
 
-          <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-              android:id="@+id/bin_bt"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_margin="5dp"
-              android:layout_weight="1"
-              android:contentDescription="desc"
-              android:gravity="center"
-              android:text="@string/bin_button_text"
-              android:typeface="serif"
-              app:icon="@drawable/ic_bin" />
+           <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+               android:id="@+id/bin_bt"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_margin="5dp"
+               android:layout_weight="1"
+               android:contentDescription="desc"
+               android:backgroundTint="@color/celeste"
+               android:textSize="20sp"
+               android:gravity="center"
+               android:text="@string/bin_button_text"
+               android:typeface="serif"
+               app:icon="@drawable/ic_bin" />
 
-          <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-              android:id="@+id/trash_bt"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_margin="5dp"
-              android:layout_weight="1"
-              android:contentDescription="desc"
-              android:gravity="center"
-              android:text="@string/trash_button_text"
-              android:typeface="serif"
-              app:icon="@drawable/ic_trash" />
+           <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+               android:id="@+id/trash_bt"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_margin="5dp"
+               android:layout_weight="1"
+               android:textSize="20sp"
+               android:contentDescription="desc"
+               android:backgroundTint="@color/celeste"
+               android:gravity="center"
+               android:text="@string/trash_button_text"
+               android:typeface="serif"
+               app:icon="@drawable/ic_trash"/>
 
 
-          <!--<Button
+           <!--<Button
               android:id="@+id/picture_bt"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
@@ -96,7 +100,10 @@
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
            android:layout_gravity="center_horizontal"
+           android:textColor="@color/black"
            android:layout_weight="1"
+           android:textSize="35sp"
+           android:textAlignment="center"
            android:text="Clicca su un bottone per riconoscere" />
 
        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -104,9 +111,12 @@
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
            android:layout_gravity="center_horizontal"
-           android:layout_margin="16dp"
+           android:layout_margin="20dp"
+           android:text="@string/mic_button_text"
+           android:backgroundTint="@color/celeste"
+           android:textSize="20sp"
            android:contentDescription="ciao"
-           app:srcCompat="@drawable/ic_microphone" />
+           app:icon="@drawable/ic_microphone" />
 
    </LinearLayout>
 

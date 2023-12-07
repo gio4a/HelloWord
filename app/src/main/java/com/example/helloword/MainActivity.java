@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.helloword.ml.Model1116;
+import com.example.helloword.ml.ModelliteMobilenet1207;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.tensorflow.lite.DataType;
@@ -62,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tv;
     private ImageCapture imageCapt;
     private SoundPool soundPool;
-    Model1116 model;
+    Model1116 modelResNet1116;
+    ModelliteMobilenet1207 modelliteMobilenet1207;
     private int[] sound=new int[6];
     private int our_width = 512;
     private int our_height = 384;
@@ -71,6 +72,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ColorUtils colorUtils = new ColorUtils();
 
     private SpeechRecognizer speechRecognizer;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        modelliteMobilenet1207.close();
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -85,7 +92,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             requestAudioPermission();
 
         try {
-            model = Model1116.newInstance(getApplicationContext());
+            //modelResNet1116 = Model1116.newInstance(getApplicationContext());
+            modelliteMobilenet1207 = ModelliteMobilenet1207.newInstance(getApplicationContext());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -432,7 +440,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             inputFeature0.loadBuffer(input);
 
                             // Runs model inference and gets result.
-                            Model1116.Outputs outputs = model.process(inputFeature0);
+                            ModelliteMobilenet1207.Outputs outputs = modelliteMobilenet1207.process(inputFeature0);
                             TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
 
                             float max=-1;
@@ -449,11 +457,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             tv.setText(labels[indexMax]);
                             soundPool.play(sound[indexMax], 1, 1,0,0,1);
 
-                            // Releases model resources if no longer used.
-                            model.close();
-                            image.close();
                         } catch (Exception e) {
-                            // TODO Handle the exception
+                            tv.setText("E: "+e.getMessage().toString());
+                        }
+
+                        finally{
+                            // Releases model resources if no longer used.
+                            //modelliteMobilenet1207.close();
+                            image.close();
                         }
                     }
                 }

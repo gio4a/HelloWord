@@ -102,9 +102,10 @@
            android:layout_gravity="center_horizontal"
            android:textColor="@color/black"
            android:layout_weight="1"
-           android:textSize="35sp"
+           android:textSize="30sp"
            android:textAlignment="center"
-           android:text="Clicca su un bottone per riconoscere" />
+           android:text="Clicca su un bottone per riconoscere"
+           android:drawablePadding="2dp"/>
 
        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
            android:id="@+id/mic_button"
@@ -114,7 +115,7 @@
            android:layout_margin="20dp"
            android:text="@string/mic_button_text"
            android:backgroundTint="@color/celeste"
-           android:textSize="20sp"
+           android:textSize="15sp"
            android:contentDescription="ciao"
            app:icon="@drawable/ic_microphone" />
 

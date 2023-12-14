@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import com.example.helloword.ml.Model1116;
 import com.example.helloword.ml.ModelliteMobilenet1207;
+import com.example.helloword.ml.ModelliteMobilenetNonq1212;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.tensorflow.lite.DataType;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ListenableFuture<ProcessCameraProvider> provider;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
     private static final int AUDIO_PERMISSION_REQUEST_CODE = 300;
-    private static final int DIM_WIN = 40;
+    private static final int DIM_WIN = 200;
     private ImageAnalysis imageAn;
     private Button bin_button, trash_button, mic_button;
     private PreviewView pview;
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SoundPool soundPool;
     Model1116 modelResNet1116;
     ModelliteMobilenet1207 modelliteMobilenet1207;
+    ModelliteMobilenetNonq1212 modelliteMobilenetNonq1212;
     private int[] sound=new int[6];
     private int our_width = 512;
     private int our_height = 384;
@@ -76,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        modelliteMobilenet1207.close();
+        modelResNet1116.close();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -92,8 +94,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             requestAudioPermission();
 
         try {
-            //modelResNet1116 = Model1116.newInstance(getApplicationContext());
-            modelliteMobilenet1207 = ModelliteMobilenet1207.newInstance(getApplicationContext());
+            modelResNet1116 = Model1116.newInstance(getApplicationContext());
+            //modelliteMobilenet1207 = ModelliteMobilenet1207.newInstance(getApplicationContext());
+            //modelliteMobilenetNonq1212 = ModelliteMobilenetNonq1212.newInstance(getApplicationContext());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -149,13 +152,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
             public void onReadyForSpeech(Bundle bundle) {
-
+                tv.setText("Parla!");
             }
 
             @Override
             public void onBeginningOfSpeech() {
-                tv.setText("");
-                tv.setText("Listening...");
+               //tv.setText("");
+                //tv.setText("Listening...");
             }
 
             @Override
@@ -183,11 +186,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //micButton.setImageResource(R.drawable.ic_mic_black_off);
                 ArrayList<String> data = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 //tv.setText(data.get(0));
-                if(data.get(0).equalsIgnoreCase("Bidone"))
+                if(data.get(0).equalsIgnoreCase("Bidone") || data.get(0).equalsIgnoreCase("contenedor"))
                 {
                     capturePhotoBin();
                 }
-                else if (data.get(0).equalsIgnoreCase("Rifiuto"))
+                else if (data.get(0).equalsIgnoreCase("Rifiuto") || data.get(0).equalsIgnoreCase("basura"))
                 {
                     capturePhotoTrash();
                 }
@@ -324,29 +327,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
+
         switch (view.getId())
         {
             case R.id.bin_bt:
                 capturePhotoBin();
-                tv.setText("Bidone della carta");
+                //tv.setText("Bidone della carta");
                 break;
 
             case R.id.trash_bt:
-                tv.setText("Bottone premuto");
+                //tv.setText("Bottone premuto");
                 capturePhotoTrash();
                 break;
         }
     }
 
     private void capturePhotoBin() {
-        tv.setText("in capturePhotoBin");
+        tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_hourglass, 0,0, 0);
+        tv.setText("Attendere...");
         imageCapt.takePicture(
                 getExecutor(),
                 new ImageCapture.OnImageCapturedCallback() {
                     @Override
                     public void onCaptureSuccess(ImageProxy image) {
                         //Create the picture's metadata
-                        tv.setText("in onCaptureSuccess");
 
                         Bitmap bitmap = image.toBitmap();
                         tv.setText(bitmap.getHeight()+"x"+bitmap.getWidth());
@@ -375,11 +379,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         int averageGreen = sumGreen/(DIM_WIN*DIM_WIN);
                         int averageBlue = sumBlue/(DIM_WIN*DIM_WIN);
 
-                        tv.setText("blue " + averageBlue + " green " + averageGreen + " red "+ averageRed);
+                        //tv.setText("blue " + averageBlue + " green " + averageGreen + " red "+ averageRed);
 
                         image.close();
 
                         String closestColour = colorUtils.getColorNameFromRgb(averageRed,averageGreen,averageBlue);
+                        tv.setCompoundDrawablesWithIntrinsicBounds(0, 0,0, 0);
                         tv.setText(closestColour);
                     }
                 }
@@ -406,14 +411,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void capturePhotoTrash() {
-        tv.setText("in capturePhotoTrash");
+        tv.setText("Attendere...");
+        tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_hourglass, 0,0, 0);
+
         imageCapt.takePicture(
                 getExecutor(),
                 new ImageCapture.OnImageCapturedCallback() {
                     @Override
                     public void onCaptureSuccess(ImageProxy image) {
                         //Create the picture's metadata
-                        tv.setText("in onCaptureSuccess");
+                        //tv.setText("in onCaptureSuccess");
+                        //Timestamp per durata
+                        //long startTime = System.currentTimeMillis();
 
                         try {
 
@@ -440,7 +449,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             inputFeature0.loadBuffer(input);
 
                             // Runs model inference and gets result.
-                            ModelliteMobilenet1207.Outputs outputs = modelliteMobilenet1207.process(inputFeature0);
+                            //ModelliteMobilenet1207.Outputs outputs = modelliteMobilenet1207.process(inputFeature0);
+                            // ModelliteMobilenetNonq1212.Outputs outputs = modelliteMobilenetNonq1212.process(inputFeature0);
+                            Model1116.Outputs outputs = modelResNet1116.process(inputFeature0);
+
+
                             TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
 
                             float max=-1;
@@ -454,9 +467,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     indexMax=i;
                                 }
                             }
-                            tv.setText(labels[indexMax]);
                             soundPool.play(sound[indexMax], 1, 1,0,0,1);
+                            tv.setCompoundDrawablesWithIntrinsicBounds(0, 0,0, 0);
+                            tv.setText(labels[indexMax]);
 
+                            //Long estimatedTime = System.currentTimeMillis() - startTime;
+                           // tv.setText(estimatedTime.toString());
                         } catch (Exception e) {
                             tv.setText("E: "+e.getMessage().toString());
                         }

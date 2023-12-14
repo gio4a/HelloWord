@@ -2,6 +2,7 @@ package com.example.helloword;
 import java.util.ArrayList;
 
 public class ColorUtils {
+    /**
     private ArrayList<ColorName> initColorList() {
         ArrayList<ColorName> colorList = new ArrayList<ColorName>();
         colorList.add(new ColorName("AliceBlue", 0xF0, 0xF8, 0xFF));
@@ -144,6 +145,18 @@ public class ColorUtils {
         colorList.add(new ColorName("WhiteSmoke", 0xF5, 0xF5, 0xF5));
         colorList.add(new ColorName("Yellow", 0xFF, 0xFF, 0x00));
         colorList.add(new ColorName("YellowGreen", 0x9A, 0xCD, 0x32));
+        return colorList;
+    }
+
+     */
+
+    private ArrayList<ColorName> initColorList() {
+        ArrayList<ColorName> colorList = new ArrayList<ColorName>();
+        colorList.add(new ColorName("Giallo", 212, 187, 68));
+        colorList.add(new ColorName("Blu", 5, 54, 181));
+        colorList.add(new ColorName("Marrone", 83, 48, 24));
+        colorList.add(new ColorName("Verde",73, 129, 63));
+        colorList.add(new ColorName("Grigio", 103, 107, 113));
         return colorList;
     }
 

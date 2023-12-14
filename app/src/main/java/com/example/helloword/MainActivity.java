@@ -47,7 +47,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 
@@ -66,7 +68,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Model1116 modelResNet1116;
     ModelliteMobilenet1207 modelliteMobilenet1207;
     ModelliteMobilenetNonq1212 modelliteMobilenetNonq1212;
-    private int[] sound=new int[6];
+    private int[] soundTrash=new int[6];
+    private int soundCapito;
+
+    private Map<String, Integer> soundBin=new HashMap<>();
     private int our_width = 512;
     private int our_height = 384;
     private String [] labels = {"Cartone", "Vetro", "Metallo", "Carta", "Plastica", "Indifferenziato"};
@@ -121,12 +126,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else
             soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 
-        sound[3] = soundPool.load(this, R.raw.carta, 1);
-        sound[0] = soundPool.load(this, R.raw.cartone, 1);
-        sound[4] = soundPool.load(this, R.raw.plastica, 1);
-        sound[1] = soundPool.load(this, R.raw.vetro, 1);
-        sound[2] = soundPool.load(this, R.raw.metallo, 1);
-        sound[5] = soundPool.load(this, R.raw.indifferenziata, 1);
+        soundTrash[3] = soundPool.load(this, R.raw.carta, 1);
+        soundTrash[0] = soundPool.load(this, R.raw.cartone, 1);
+        soundTrash[4] = soundPool.load(this, R.raw.plastica, 1);
+        soundTrash[1] = soundPool.load(this, R.raw.vetro, 1);
+        soundTrash[2] = soundPool.load(this, R.raw.metallo, 1);
+        soundTrash[5] = soundPool.load(this, R.raw.indifferenziato, 1);
+
+        soundBin.put("Blu", soundPool.load(this, R.raw.blu, 1));
+        soundBin.put("Marrone", soundPool.load(this, R.raw.marrone, 1));
+        soundBin.put("Grigio", soundPool.load(this, R.raw.grigio, 1));
+        soundBin.put("Verde", soundPool.load(this, R.raw.verde, 1));
+        soundBin.put("Giallo", soundPool.load(this, R.raw.giallo, 1));
+
+        soundCapito=soundPool.load(this, R.raw.non_ho_capito, 1);
+
 
         bin_button.setOnClickListener(this);
         trash_button.setOnClickListener(this);
@@ -186,17 +200,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //micButton.setImageResource(R.drawable.ic_mic_black_off);
                 ArrayList<String> data = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 //tv.setText(data.get(0));
-                if(data.get(0).equalsIgnoreCase("Bidone") || data.get(0).equalsIgnoreCase("contenedor"))
+                if(data.get(0).equalsIgnoreCase("Bidone"))
                 {
                     capturePhotoBin();
                 }
-                else if (data.get(0).equalsIgnoreCase("Rifiuto") || data.get(0).equalsIgnoreCase("basura"))
+                else if (data.get(0).equalsIgnoreCase("Rifiuto"))
                 {
                     capturePhotoTrash();
                 }
                 else
                 {
                     tv.setText("Non ho capito");
+                    soundPool.play(soundCapito, 1,1, 0,0, 1);
+
                 }
 
 
@@ -381,9 +397,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         //tv.setText("blue " + averageBlue + " green " + averageGreen + " red "+ averageRed);
 
+
                         image.close();
 
                         String closestColour = colorUtils.getColorNameFromRgb(averageRed,averageGreen,averageBlue);
+                        soundPool.play(soundBin.get(closestColour), 1, 1,0,0,1);
                         tv.setCompoundDrawablesWithIntrinsicBounds(0, 0,0, 0);
                         tv.setText(closestColour);
                     }
@@ -467,7 +485,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     indexMax=i;
                                 }
                             }
-                            soundPool.play(sound[indexMax], 1, 1,0,0,1);
+                            soundPool.play(soundTrash[indexMax], 1, 1,0,0,1);
                             tv.setCompoundDrawablesWithIntrinsicBounds(0, 0,0, 0);
                             tv.setText(labels[indexMax]);
 

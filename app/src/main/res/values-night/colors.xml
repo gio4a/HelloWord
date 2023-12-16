@@ -6,7 +6,7 @@
     <color name="pastello">#177fd4</color>
     <color name="celeste">#19dfe6</color>
     <color name="black">#FF000000</color>
-    <color name="textViewColor">#FF000000</color>
+    <color name="textViewColor">#FFFFFFFF</color>
     <color name="white">#FFFFFFFF</color>
     <color name="red">#FFF00000</color>
     <color name="teal_200">#000000</color>
